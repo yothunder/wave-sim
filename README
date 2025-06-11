@@ -1,0 +1,77 @@
+## Overview
+
+The model solves:
+$$
+\frac{\partial N}{\partial t} 
++ \frac{\partial (C_x N)}{\partial x}
++ \frac{\partial (C_y N)}{\partial y}
++ \frac{\partial (C_\sigma N)}{\partial \sigma}
++ \frac{\partial (C_\theta N)}{\partial \theta}
+= \frac{S}{\sigma}
+$$
+
+Where:
+- $(N(x, y, \sigma, \theta, t))$ is the wave action density
+- $(C_i)$ are the propagation velocities
+- $(S)$ represents source/sink terms (e.g., wind input, dissipation)
+
+## Project Structure
+```markdown
+wave_model/
+├── main.f90             <- Time integration and main loop
+├── grid.f90             <- Grid initialization for x, y, sigma, theta
+├── physics.f90          <- Wind input (S_in) and dissipation (S_ds)
+├── waveprop.f90         <- wave propagation (spatial and intra-spectral)
+├── io.f90               <- Input/output utilities
+├── Makefile             <- Build configuration
+└── input/               <- Input fields (e.g., wind, initial spectrum, boundary conditions)
+```
+
+## Requirements
+
+- Fortran 90+ compiler (e.g. `gfortran`, `ifort`, or `flang`)
+- Make utility
+- Python (optional, for visualization/post-processing)
+- NetCDF libraries (optional, for structured I/O)
+
+## Features
+
+- 2D spatial grid $(x, y)$
+- 1D logarithmic frequency bins $(\sigma)$
+- 1D uniform direction bins $(\theta)$
+- Explicit time stepping
+- First-order upwind advection
+- Modular source term implementation
+- ASCII-based I/O (NetCDF optional)
+
+## Planned Development Stages
+
+1. Initialize grid and flat spectrum
+2. Implement spatial advection $(x, y)$
+3. Add spectral advection $(\sigma, \theta)$
+4. Add wind input term $(S_{in})$
+5. Add whitecapping dissipation $(S_{ds})$
+6. Run test case with idealized fetch-limited wind
+7. Add profiling and potential GPU hooks (OpenMP Offload)
+
+## Validation Plans
+
+- Compare model results to analytical fetch-limited growth curves
+- Validate spectral shape against Pierson-Moskowitz spectrum
+- Compare Hs evolution with WAVEWATCH III output for idealized wind forcing
+
+## Goals
+
+- Reconstruct the core physics of third-generation wave models
+- Enable modular testing of source terms and numerical schemes
+- Support educational and research use in coastal and HPC applications
+
+## Author
+
+Suwignyo Prasetyo  
+LinkedIn: https://www.linkedin.com/in/tyo-suwignyo  
+Email: suwignyo.prasetyo@bmkg.go.id
+
+## License
+
+This project is released under the MIT License.
