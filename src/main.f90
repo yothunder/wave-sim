@@ -4,50 +4,59 @@ program wavemod
     use wavepropmod
     use physicsmod
     use iomod
+    use paramsmod
     implicit none
     
     real(8), allocatable :: N(:,:,:,:), N_new(:,:,:,:)
+    real(8), allocatable :: Hs(:,:), Tm(:,:)
     real(8) :: t
+    real(8), parameter :: N_seed = 1.0d-6
     integer :: it, jsea, ispec, i, j, k, l
 
-    ! Allocate core fields
-    allocate(N(nx, ny, nsigma, ntheta))
-    allocate(N_new(nx, ny, nsigma, ntheta))
-    allocate(u10(nt, nx, ny))
-
-    ! Initialize grid and spectra
     call grid_init()
 
-    ! Read wind field
-    call read_wind('/home/yothunder/fort/wvmod/input/u10.txt')
+    allocate(N(nx, ny, nsigma, ntheta))
+    allocate(N_new(nx, ny, nsigma, ntheta))
+    allocate(N_bdy(nx, ny, nsigma, ntheta))
+    allocate(u10(nt,nx,ny), v10(nt,nx,ny))
+    allocate(Hs(nx, ny))
+    allocate(Tm(nx, ny))
 
-    ! Read initial boundary spectrum
-    call read_boundary_N(N, '/home/yothunder/fort/wvmod/input/bound.txt')
+    print *, 'Starting wave model simulation...'
+    print *, 'Grid size: ', nx, 'x', ny, 'x', nsigma, 'x', ntheta
+    print *, 'Total time steps: ', nt
+    print *, 'Time step (s): ', dt
+    print *, 'Total simulation time (hr): ', tmax / 3600.0d0
 
-    N = 0.0d0
-    N_new = 0.0d0
+    print *, 'Opening wind forcing...'
+    call read_wind('/home/yothunder/fort/wvmod/input/u10.txt', u10)
+    call read_wind('/home/yothunder/fort/wvmod/input/v10.txt', v10)
 
+    N(:,:,:,:) = N_seed ! Initialize with a small background spectrum
     do it = 1, nt
         t = it * dt
-
+        !$omp parallel do collapse(2) private(i, j, k, l, jsea, ispec)
         do j = 1, ny
             do i = 1, nx
                 jsea = (j - 1) * nx + i
                 do l = 1, ntheta
                     do k = 1, nsigma
                         ispec = (l-1) * nsigma + k
-                        ! Compute spatial propagation (e.g., via upwind scheme)
-                        call propagate_wave(N, N_new, i, j, k, l)
-                        ! Apply source terms (e.g., wind input and dissipation)
-                        call calc_source_terms(N, N_new, it, i, j, k, l)
+                        call propagate_wave(N, N_new, i, j, k, l, it)      ! Compute spatial propagation (via upwind scheme)
+                        call calc_source_terms(N, N_new, it, i, j, k, l)   ! Apply source terms (wind input and dissipation)
+                        N_new(i,j,k,l) = max(N_new(i,j,k,l), 0.0d0)
                     end do
                 end do
             end do
         end do
-        
-        N = N_new
+        !$omp end parallel do
 
-        if (mod(it, 24) == 0) then
+        N = N_new
+        call compute_params(N_new, Hs, Tm)
+        call write_diagnostics(Hs, Tm, it)
+        call write_spectrum(N, it, nx/2, ny/2)
+        
+        if (mod(it, 10) == 0) then
             write(*, '(A,I5,A,F10.2,A)') 'Step: ', it, ', Time (hr): ', t/3600, new_line('a')
         end if
     end do
