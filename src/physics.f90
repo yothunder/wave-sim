@@ -2,7 +2,7 @@ module physicsmod
     use gridmod
     use windmod
     implicit none
-    real(8), parameter :: A_in = 1.90d0, B_ds = 0.0002d0, m_ds = 4.0d0
+    real(8), parameter :: A_in = 0.250d0, B_ds = 0.0002d0, m_ds = 3.30d0
     real(8), parameter :: sigma_peak = 0.20d0
     real(8), parameter :: g = 9.81d0
 
