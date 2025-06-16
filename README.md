@@ -2,12 +2,7 @@
 
 The model solves:
 $$
-\frac{\partial N}{\partial t} 
-+ \frac{\partial (C_x N)}{\partial x}
-+ \frac{\partial (C_y N)}{\partial y}
-+ \frac{\partial (C_\sigma N)}{\partial \sigma}
-+ \frac{\partial (C_\theta N)}{\partial \theta}
-= \frac{S}{\sigma}
+\frac{\partial N}{\partial t} + \frac{\partial (C_x N)}{\partial x} + \frac{\partial (C_y N)}{\partial y} + \frac{\partial (C_\sigma N)}{\partial \sigma} + \frac{\partial (C_\theta N)}{\partial \theta} = \frac{S}{\sigma}
 $$
 
 Where:
