@@ -54,6 +54,18 @@ wavemod/
 - Modular source terms
 - ASCII-based I/O (easy to inspect and debug)
 
+## Running the program
+
+```bash
+# build the program
+make
+
+# if using openmp
+export OMP_NUM_THREADS=<number of processes>
+
+./wave_model
+```
+
 ## Tunable constants and model configurations
 
 The following constants are defined in `src/physics.f90` may be modified:
